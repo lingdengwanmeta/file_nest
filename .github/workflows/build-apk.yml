@@ -49,7 +49,17 @@ jobs:
           bash tool/ci_patch_android.sh
 
       - name: 拉取依赖
-        run: flutter pub get
+        run: |
+          set +e
+          flutter pub get 2>&1 | tee "$RUNNER_TEMP/pubget.log"
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            echo "::error::flutter pub get 失败，下面是关键输出"
+            tail -n 25 "$RUNNER_TEMP/pubget.log" | while IFS= read -r line; do
+              echo "::error::$line"
+            done
+            exit "$status"
+          fi
 
       - name: 构建 release APK
         run: flutter build apk --release
