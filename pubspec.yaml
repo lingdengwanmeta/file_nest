@@ -15,8 +15,8 @@ dependencies:
   sqflite: ">=2.3.0 <3.0.0"
   path: ">=1.9.0 <2.0.0"
   path_provider: ">=2.1.0 <3.0.0"
-  # 11.x 起改为静态方法 FilePicker.pickFiles(...)，代码按 11.x 编写
-  file_picker: ">=11.0.0 <12.0.0"
+  # 13.x：联邦式实现，Android 端不再自行应用 KGP，兼容 AGP 9 + builtInKotlin=false
+  file_picker: ">=13.0.0 <14.0.0"
   open_filex: ">=4.3.0 <7.0.0"
   # 相册（图片/视频）浏览与导入
   photo_manager: ">=3.7.0 <4.0.0"

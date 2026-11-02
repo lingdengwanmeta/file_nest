@@ -123,12 +123,8 @@ class _BackupPageState extends State<BackupPage> {
 
   Future<void> _restore() async {
     if (_busy) return;
-    final picked = await FilePicker.pickFiles(
-      allowMultiple: false,
-      type: FileType.any,
-      withData: false,
-    );
-    final path = picked?.files.single.path;
+    final picked = await FilePicker.pickFile(type: FileType.any);
+    final path = picked?.path;
     if (path == null || !mounted) return;
 
     final confirmed = await showConfirmDialog(

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -794,17 +795,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<void> _pickFiles({required bool imagesOnly}) async {
     try {
-      final result = await FilePicker.pickFiles(
-        allowMultiple: true,
+      final files = await FilePicker.pickFiles(
         type: imagesOnly ? FileType.image : FileType.any,
-        withData: false,
       );
-      if (result == null || result.files.isEmpty) return;
+      if (files.isEmpty) return;
       final sources = <ImportSource>[];
-      for (final file in result.files) {
+      for (final file in files) {
         final path = file.path;
         if (path == null) continue;
-        sources.add(ImportSource(path: path, name: file.name, size: file.size));
+        final size = file.lengthSync() ?? File(path).lengthSync();
+        sources.add(ImportSource(path: path, name: file.name, size: size));
       }
       if (sources.isEmpty) {
         _snack('无法读取所选文件');
