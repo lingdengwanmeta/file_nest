@@ -34,10 +34,14 @@ jobs:
         run: yes | flutter doctor --android-licenses || true
 
       - name: 生成 Android 平台工程（脚手架）
-        run: flutter create --org com.example --project-name file_nest --platforms android .
-
-      - name: 还原业务代码与依赖清单
-        run: git checkout -- lib pubspec.yaml
+        run: |
+          SCAFFOLD="${RUNNER_TEMP}/scaffold"
+          rm -rf "$SCAFFOLD"
+          flutter create --org com.example --project-name file_nest --platforms android "$SCAFFOLD"
+          cp -R "$SCAFFOLD/android" ./android
+          if [ -f "$SCAFFOLD/.metadata" ]; then cp "$SCAFFOLD/.metadata" ./.metadata; fi
+          echo "--- android 目录内容 ---"
+          ls -1 ./android
 
       - name: 设置应用名称与 queries 声明
         run: |
