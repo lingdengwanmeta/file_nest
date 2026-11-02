@@ -1,0 +1,33 @@
+name: file_nest
+description: "本地文件与文档的多级分类管理器（Android）"
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  # 使用区间约束，便于 pub 在当前 Flutter 版本上解析出可用版本
+  sqflite: ">=2.3.0 <3.0.0"
+  path: ">=1.9.0 <2.0.0"
+  path_provider: ">=2.1.0 <3.0.0"
+  file_picker: ">=8.0.0 <11.0.0"
+  open_filex: ">=4.3.0 <6.0.0"
+  # 相册（图片/视频）浏览与导入
+  photo_manager: ">=3.7.0 <4.0.0"
+  # 备份包导出到网盘/微信
+  share_plus: ">=13.0.0 <14.0.0"
+  # 备份包打包与解压
+  archive: ">=4.0.0 <5.0.0"
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ">=4.0.0 <7.0.0"
+
+flutter:
+  uses-material-design: true

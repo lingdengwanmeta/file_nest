@@ -1,0 +1,24 @@
+# Dart / Flutter
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.lock.bak
+
+# 平台工程由 CI 或 setup.ps1 生成，不入库
+android/
+ios/
+.metadata
+analysis_options.yaml
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+Thumbs.db
+.DS_Store
