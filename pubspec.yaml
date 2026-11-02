@@ -20,7 +20,8 @@ dependencies:
   # 相册（图片/视频）浏览与导入
   photo_manager: ">=3.7.0 <4.0.0"
   # 备份包导出到网盘/微信
-  share_plus: ">=13.0.0 <14.0.0"
+  # 13.x 依赖 win32 ^6，与 file_picker 的 win32 ^5 冲突，因此固定在 12.x
+  share_plus: ">=12.0.0 <13.0.0"
   # 备份包打包与解压
   archive: ">=4.0.0 <5.0.0"
 
