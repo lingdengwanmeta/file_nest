@@ -794,7 +794,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<void> _pickFiles({required bool imagesOnly}) async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         allowMultiple: true,
         type: imagesOnly ? FileType.image : FileType.any,
         withData: false,

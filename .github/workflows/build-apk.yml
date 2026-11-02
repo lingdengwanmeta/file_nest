@@ -67,11 +67,16 @@ jobs:
           flutter build apk --release 2>&1 | tee "$RUNNER_TEMP/build.log"
           status=${PIPESTATUS[0]}
           if [ "$status" -ne 0 ]; then
-            echo "::error::flutter build apk 失败，以下是日志尾部"
+            echo "::error::flutter build apk 失败，抓取关键错误行"
             tr '\r' '\n' < "$RUNNER_TEMP/build.log" \
               | sed -e 's/\x1b\[[0-9;]*m//g' \
-              | grep -vE "^\s*$|^\[=*\s*\]|Unzipping|Downloading|Extracting" \
-              | tail -n 45 \
+              | grep -E "FAILED|error:|Error:|Exception|What went wrong|Caused by|exit code|Could not|not found|Failed to|JAVA_HOME|SDK" \
+              | tail -n 25 \
+              | while IFS= read -r line; do echo "::error::${line}"; done
+            echo "::error::--- 原始日志最后 30 行 ---"
+            tr '\r' '\n' < "$RUNNER_TEMP/build.log" \
+              | sed -e 's/\x1b\[[0-9;]*m//g' \
+              | tail -n 30 \
               | while IFS= read -r line; do echo "::error::${line}"; done
             exit "$status"
           fi
