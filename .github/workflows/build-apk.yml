@@ -68,9 +68,10 @@ jobs:
           status=${PIPESTATUS[0]}
           if [ "$status" -ne 0 ]; then
             echo "::error::flutter build apk 失败，以下是日志尾部"
-            grep -vE "^\[|Unzipping|Downloading|Extracting|^\s*$" "$RUNNER_TEMP/build.log" \
+            tr '\r' '\n' < "$RUNNER_TEMP/build.log" \
               | sed -e 's/\x1b\[[0-9;]*m//g' \
-              | tail -n 40 \
+              | grep -vE "^\s*$|^\[=*\s*\]|Unzipping|Downloading|Extracting" \
+              | tail -n 45 \
               | while IFS= read -r line; do echo "::error::${line}"; done
             exit "$status"
           fi
