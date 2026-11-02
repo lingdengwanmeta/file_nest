@@ -45,3 +45,22 @@ with open(path, 'w', encoding='utf-8') as fh:
 
 print('AndroidManifest 已更新')
 PY
+
+# 移除 ndkVersion 声明：本项目所有插件都是 Java/Kotlin 或纯 Dart 实现，
+# 不需要本地 NDK 编译。保留该声明会迫使 Gradle 下载约 1GB 的 NDK，在 CI 上极易失败。
+python3 - <<'PY'
+import os
+
+for name in ('android/app/build.gradle.kts', 'android/app/build.gradle'):
+    if not os.path.exists(name):
+        continue
+    with open(name, encoding='utf-8') as fh:
+        lines = fh.read().splitlines()
+    kept = [line for line in lines if 'ndkVersion' not in line]
+    if len(kept) != len(lines):
+        with open(name, 'w', encoding='utf-8') as fh:
+            fh.write('\n'.join(kept) + '\n')
+        print(f'{name} 已移除 ndkVersion 声明')
+
+print('Gradle 配置已处理')
+PY
