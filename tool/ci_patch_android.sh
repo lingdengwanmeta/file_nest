@@ -64,3 +64,11 @@ for name in ('android/app/build.gradle.kts', 'android/app/build.gradle'):
 
 print('Gradle 配置已处理')
 PY
+
+# 删除脚手架自带的插件注册表，交由 flutter build 按实际依赖重新生成，
+# 避免残留的旧注册项引用不存在的插件类（cannot find symbol）。
+REGISTRANT="android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java"
+if [ -f "$REGISTRANT" ]; then
+  rm -f "$REGISTRANT"
+  echo "已删除脚手架内置的 GeneratedPluginRegistrant.java"
+fi

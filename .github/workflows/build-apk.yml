@@ -78,6 +78,11 @@ jobs:
               | sed -e 's/\x1b\[[0-9;]*m//g' \
               | tail -n 30 \
               | while IFS= read -r line; do echo "::error::${line}"; done
+            REG=android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+            if [ -f "$REG" ]; then
+              echo "::error::--- GeneratedPluginRegistrant.java 前 45 行 ---"
+              sed -n '1,45p' "$REG" | while IFS= read -r line; do echo "::error::${line}"; done
+            fi
             exit "$status"
           fi
 
