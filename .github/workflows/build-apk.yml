@@ -33,6 +33,9 @@ jobs:
       - name: 接受 Android 许可
         run: yes | flutter doctor --android-licenses || true
 
+      - name: 配置 Gradle 缓存
+        uses: gradle/actions/setup-gradle@v4
+
       - name: 生成 Android 平台工程（脚手架）
         run: |
           SCAFFOLD="${RUNNER_TEMP}/scaffold"
@@ -67,22 +70,40 @@ jobs:
           flutter build apk --release 2>&1 | tee "$RUNNER_TEMP/build.log"
           status=${PIPESTATUS[0]}
           if [ "$status" -ne 0 ]; then
-            echo "::error::flutter build apk 失败，抓取关键错误行"
-            tr '\r' '\n' < "$RUNNER_TEMP/build.log" \
-              | sed -e 's/\x1b\[[0-9;]*m//g' \
-              | grep -E "FAILED|error:|Error:|Exception|What went wrong|Caused by|exit code|Could not|not found|Failed to|JAVA_HOME|SDK" \
-              | tail -n 25 \
-              | while IFS= read -r line; do echo "::error::${line}"; done
-            echo "::error::--- 原始日志最后 30 行 ---"
-            tr '\r' '\n' < "$RUNNER_TEMP/build.log" \
-              | sed -e 's/\x1b\[[0-9;]*m//g' \
-              | tail -n 30 \
-              | while IFS= read -r line; do echo "::error::${line}"; done
-            REG=android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
-            if [ -f "$REG" ]; then
-              echo "::error::--- GeneratedPluginRegistrant.java 前 45 行 ---"
-              sed -n '1,45p' "$REG" | while IFS= read -r line; do echo "::error::${line}"; done
-            fi
+            # 清理 ANSI 颜色码与回车符，得到可 grep 的纯文本日志
+            tr '\r' '\n' < "$RUNNER_TEMP/build.log" | sed -e 's/\x1b\[[0-9;]*m//g' > "$RUNNER_TEMP/clean.log"
+            # 详细诊断写入 Job Summary：注解有 10 条上限，长内容必须放这里才不会被截断
+            {
+              echo "## 构建失败诊断（flutter build apk --release）"
+              echo
+              echo "### 1. 编译/Gradle 错误块（含 symbol / location）"
+              echo '```'
+              grep -n -B3 -A5 -E "error:|What went wrong|Caused by|FAILURE:|Execution failed" "$RUNNER_TEMP/clean.log" | head -n 120
+              echo '```'
+              echo
+              echo "### 2. GeneratedPluginRegistrant.java（前 40 行）"
+              REG=android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+              if [ -f "$REG" ]; then
+                echo '```java'
+                sed -n '1,40p' "$REG"
+                echo '```'
+              else
+                echo "文件不存在：$REG"
+              fi
+              echo
+              echo "### 3. 参与 Android 构建的插件（name / package）"
+              echo '```'
+              python3 -c "import json;d=json.load(open('.flutter-plugins-dependencies'));[print(p.get('name'),p.get('package')) for p in d['plugins']['android']]" 2>&1 || true
+              echo '```'
+              echo
+              echo "### 4. 原始日志最后 40 行"
+              echo '```'
+              tail -n 40 "$RUNNER_TEMP/clean.log"
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            # 只发一条注解，避免超过上限导致真正有用的信息被丢弃
+            first_err=$(grep -m1 -E "error:|What went wrong|Execution failed" "$RUNNER_TEMP/clean.log")
+            echo "::error::flutter build apk 失败：${first_err:-详见 Job Summary 的构建失败诊断}"
             exit "$status"
           fi
 
